@@ -7,7 +7,6 @@
 //
 
 import Foundation
-import CocoaAsyncSocket
 
 /**
  * Connection State
@@ -164,8 +163,18 @@ public class CocoaMQTT: NSObject, CocoaMQTTClient {
     ///
     /// - Note:
     public var backgroundOnSocket: Bool {
-        get { return (self.socket as? CocoaMQTTSocket)?.backgroundOnSocket ?? true }
-        set { (self.socket as? CocoaMQTTSocket)?.backgroundOnSocket = newValue }
+        get {
+            #if canImport(CocoaAsyncSocket)
+            return (self.socket as? CocoaMQTTSocket)?.backgroundOnSocket ?? true
+            #else
+            return true
+            #endif
+        }
+        set {
+            #if canImport(CocoaAsyncSocket)
+            (self.socket as? CocoaMQTTSocket)?.backgroundOnSocket = newValue
+            #endif
+        }
     }
     
     /// Delegate Executed queue. Default is `DispatchQueue.main`
@@ -557,12 +566,6 @@ extension CocoaMQTT: CocoaMQTTSocketDelegate {
         
         delegate?.mqtt?(self, didReceive: trust, completionHandler: completionHandler)
         didReceiveTrust(self, trust, completionHandler)
-    }
-
-    // ?
-    public func socketDidSecure(_ sock: GCDAsyncSocket) {
-        printDebug("Socket has successfully completed SSL/TLS negotiation")
-        sendConnectFrame()
     }
 
     public func socket(_ socket: CocoaMQTTSocketProtocol, didWriteDataWithTag tag: Int) {

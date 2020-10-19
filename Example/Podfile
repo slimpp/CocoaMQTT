@@ -2,5 +2,7 @@ platform :ios, 10.0
 use_frameworks!
 
 target 'Example' do
+    pod 'CocoaMQTT', :path => '../'
     pod 'CocoaMQTT/WebSockets', :path => '../'
+    pod 'CocoaMQTT/CocoaAsyncSocket', :path => '../'
 end

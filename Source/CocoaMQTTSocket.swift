@@ -6,7 +6,9 @@
 //
 
 import Foundation
+#if canImport(CocoaAsyncSocket)
 import CocoaAsyncSocket
+#endif
 
 // MARK: - Interfaces
 
@@ -30,6 +32,7 @@ public protocol CocoaMQTTSocketProtocol {
     func write(_ data: Data, withTimeout timeout: TimeInterval, tag: Int)
 }
 
+#if canImport(CocoaAsyncSocket)
 // MARK: - CocoaMQTTSocket
 
 public class CocoaMQTTSocket: NSObject {
@@ -133,3 +136,6 @@ extension CocoaMQTTSocket: GCDAsyncSocketDelegate {
         delegate?.socketDidDisconnect(self, withError: err)
     }
 }
+#elseif canImport(Network)
+public typealias CocoaMQTTSocket = CocoaMQTTNetworkConnectionSocket
+#endif

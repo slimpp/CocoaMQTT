@@ -42,6 +42,7 @@
 		8D43DE6622FAFF2500D9A06B /* FrameDisconnect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D43DE6522FAFF2500D9A06B /* FrameDisconnect.swift */; };
 		8D7A262E23AF2FEA00CE7442 /* client-keycert.p12 in Resources */ = {isa = PBXBuildFile; fileRef = 8D7A262D23AF2FEA00CE7442 /* client-keycert.p12 */; };
 		8D7A262F23AF3B4700CE7442 /* Starscream.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6EC871DF23A4214000F69AE8 /* Starscream.framework */; };
+		8E67B6C12533F70B00B2468E /* CocoaMQTTNetworkConnectionSocket.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E67B6C02533F70B00B2468E /* CocoaMQTTNetworkConnectionSocket.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -106,6 +107,7 @@
 		8D43DE6322FAFE5F00D9A06B /* FramePingResp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FramePingResp.swift; sourceTree = "<group>"; };
 		8D43DE6522FAFF2500D9A06B /* FrameDisconnect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrameDisconnect.swift; sourceTree = "<group>"; };
 		8D7A262D23AF2FEA00CE7442 /* client-keycert.p12 */ = {isa = PBXFileReference; lastKnownFileType = file; path = "client-keycert.p12"; sourceTree = "<group>"; };
+		8E67B6C02533F70B00B2468E /* CocoaMQTTNetworkConnectionSocket.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CocoaMQTTNetworkConnectionSocket.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -187,6 +189,7 @@
 		6EC871E123A4214D00F69AE8 /* Socket */ = {
 			isa = PBXGroup;
 			children = (
+				8E67B6C02533F70B00B2468E /* CocoaMQTTNetworkConnectionSocket.swift */,
 				6EC871E223A421A200F69AE8 /* CocoaMQTTSocket.swift */,
 				6EC871E423A421DE00F69AE8 /* CocoaMQTTWebSocket.swift */,
 			);
@@ -410,6 +413,7 @@
 				8D43DE5622FAEDDA00D9A06B /* FramePubComp.swift in Sources */,
 				82519C0722ACC6E100FA0815 /* CocoaMQTTTypes.swift in Sources */,
 				8D43DE4C22FAEB8B00D9A06B /* FrameConnect.swift in Sources */,
+				8E67B6C12533F70B00B2468E /* CocoaMQTTNetworkConnectionSocket.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
