@@ -8,67 +8,64 @@
 import Foundation
 
 public class MqttDecodeConnAck: NSObject {
-
 //    var connackData: [UInt8]
 //
 //    init(connackData: [UInt8]) {
 //        connackData = connackData
 //    }
 
-    //3.2.2.3 CONNACK Properties
-    //3.2.2.3.1 Property Length
+    // 3.2.2.3 CONNACK Properties
+    // 3.2.2.3.1 Property Length
     public var propertyLength: Int?
-    //3.2.2.3.2 Session Expiry Interval
+    // 3.2.2.3.2 Session Expiry Interval
     public var sessionExpiryInterval: UInt32?
-    //3.2.2.3.3 Receive Maximum
+    // 3.2.2.3.3 Receive Maximum
     public var receiveMaximum: UInt16?
-    //3.2.2.3.4 Maximum QoS
+    // 3.2.2.3.4 Maximum QoS
     public var maximumQoS: CocoaMQTTQoS?
-    //3.2.2.3.5 Retain Available
+    // 3.2.2.3.5 Retain Available
     public var retainAvailable: Bool?
-    //3.2.2.3.6 Maximum Packet Size
+    // 3.2.2.3.6 Maximum Packet Size
     public var maximumPacketSize: UInt32?
-    //3.2.2.3.7 Assigned Client Identifier
+    // 3.2.2.3.7 Assigned Client Identifier
     public var assignedClientIdentifier: String?
-    //3.2.2.3.8 Topic Alias Maximum
+    // 3.2.2.3.8 Topic Alias Maximum
     public var topicAliasMaximum: UInt16?
-    //3.2.2.3.9 Reason String
+    // 3.2.2.3.9 Reason String
     public var reasonString: String?
-    //3.2.2.3.10 User Property
+    // 3.2.2.3.10 User Property
     public var userProperty: [String: String]?
-    //3.2.2.3.11 Wildcard Subscription Available
+    // 3.2.2.3.11 Wildcard Subscription Available
     public var wildcardSubscriptionAvailable: Bool?
-    //3.2.2.3.12 Subscription Identifiers Available
+    // 3.2.2.3.12 Subscription Identifiers Available
     public var subscriptionIdentifiersAvailable: Bool?
-    //3.2.2.3.13 Shared Subscription Available
+    // 3.2.2.3.13 Shared Subscription Available
     public var sharedSubscriptionAvailable: Bool?
-    //3.2.2.3.14 Server Keep Alive
+    // 3.2.2.3.14 Server Keep Alive
     public var serverKeepAlive: UInt16?
-    //3.2.2.3.15 Response Information
+    // 3.2.2.3.15 Response Information
     public var responseInformation: String?
-    //3.2.2.3.16 Server Reference
+    // 3.2.2.3.16 Server Reference
     public var serverReference: String?
-    //3.2.2.3.17 Authentication Method
+    // 3.2.2.3.17 Authentication Method
     public var authenticationMethod: String?
-    //3.2.2.3.18 Authentication Data
+    // 3.2.2.3.18 Authentication Data
     public var authenticationData = [UInt8]()
 
-
-
-    public func properties(connackData: [UInt8]){
-        //3.2.2.3 CONNACK Properties
-        var index = 2  //sessPresent 0 reasonCode 1 
+    public func properties(connackData: [UInt8]) {
+        // 3.2.2.3 CONNACK Properties
+        var index = 2  // sessPresent 0 reasonCode 1 
         let propertyLengthVariableByteInteger = decodeVariableByteInteger(data: connackData, offset: index)
         propertyLength = propertyLengthVariableByteInteger.res
         index = propertyLengthVariableByteInteger.newOffset
         let occupyIndex = index
 
-        var protocolVersion = "";
+        var protocolVersion = ""
         if let storage = CocoaMQTTStorage() {
             protocolVersion = storage.queryMQTTVersion()
         }
 
-        if (protocolVersion == "5.0"){
+        if protocolVersion == "5.0" {
             // properties
             while index - occupyIndex < propertyLength! {
                 let resVariableByteInteger = decodeVariableByteInteger(data: connackData, offset: index)
@@ -79,16 +76,15 @@ public class MqttDecodeConnAck: NSObject {
                 }
 
                 switch propertyName.rawValue {
-
                 case CocoaMQTTPropertyName.sessionExpiryInterval.rawValue:
 
-                    let comRes = integerCompute(data: connackData, formatType: formatInt.formatUint32.rawValue, offset: index)
+                    let comRes = integerCompute(data: connackData, formatType: FormatInt.formatUint32.rawValue, offset: index)
                     sessionExpiryInterval = UInt32(comRes!.res)
                     index = comRes!.newOffset
 
                 case CocoaMQTTPropertyName.receiveMaximum.rawValue:
 
-                    let comRes = integerCompute(data: connackData, formatType: formatInt.formatUint16.rawValue, offset: index)
+                    let comRes = integerCompute(data: connackData, formatType: FormatInt.formatUint16.rawValue, offset: index)
                     receiveMaximum = UInt16(comRes!.res)
                     index = comRes!.newOffset
 
@@ -105,7 +101,7 @@ public class MqttDecodeConnAck: NSObject {
                     index += 1
 
                 case CocoaMQTTPropertyName.retainAvailable.rawValue:
-                    if index > connackData.count  {
+                    if index > connackData.count {
                         break
                     }
                     if connackData[index] & 0x01 > 0 {
@@ -118,7 +114,7 @@ public class MqttDecodeConnAck: NSObject {
 
                 case CocoaMQTTPropertyName.maximumPacketSize.rawValue:
 
-                    let comRes = integerCompute(data: connackData, formatType: formatInt.formatUint32.rawValue, offset: index)
+                    let comRes = integerCompute(data: connackData, formatType: FormatInt.formatUint32.rawValue, offset: index)
                     maximumPacketSize = UInt32(comRes!.res)
                     index = comRes!.newOffset
 
@@ -131,7 +127,7 @@ public class MqttDecodeConnAck: NSObject {
 
                 case CocoaMQTTPropertyName.topicAliasMaximum.rawValue:
 
-                    let comRes = integerCompute(data: connackData, formatType: formatInt.formatUint16.rawValue, offset: index)
+                    let comRes = integerCompute(data: connackData, formatType: FormatInt.formatUint16.rawValue, offset: index)
                     topicAliasMaximum = UInt16(comRes!.res)
                     index = comRes!.newOffset
 
@@ -143,8 +139,8 @@ public class MqttDecodeConnAck: NSObject {
                     index = result.newOffset
 
                 case CocoaMQTTPropertyName.userProperty.rawValue:
-                    var key:String?
-                    var value:String?
+                    var key: String?
+                    var value: String?
                     guard let keyRes = unsignedByteToString(data: connackData, offset: index) else {
                         break
                     }
@@ -160,7 +156,7 @@ public class MqttDecodeConnAck: NSObject {
                     userProperty![key!] = value
 
                 case CocoaMQTTPropertyName.wildcardSubscriptionAvailable.rawValue:
-                    if index > connackData.count  {
+                    if index > connackData.count {
                         break
                     }
                     if connackData[index] & 0x01 > 0 {
@@ -171,7 +167,7 @@ public class MqttDecodeConnAck: NSObject {
                     index += 1
 
                 case CocoaMQTTPropertyName.subscriptionIdentifiersAvailable.rawValue:
-                    if index > connackData.count  {
+                    if index > connackData.count {
                         break
                     }
                     if connackData[index] & 0x01 > 0 {
@@ -182,7 +178,7 @@ public class MqttDecodeConnAck: NSObject {
                     index += 1
 
                 case CocoaMQTTPropertyName.sharedSubscriptionAvailable.rawValue:
-                    if index > connackData.count  {
+                    if index > connackData.count {
                         break
                     }
                     if connackData[index] & 0x01 > 0 {
@@ -194,7 +190,7 @@ public class MqttDecodeConnAck: NSObject {
 
                 case CocoaMQTTPropertyName.serverKeepAlive.rawValue:
 
-                    let comRes = integerCompute(data: connackData, formatType: formatInt.formatUint16.rawValue, offset: index)
+                    let comRes = integerCompute(data: connackData, formatType: FormatInt.formatUint16.rawValue, offset: index)
                     serverKeepAlive = UInt16(comRes!.res)
                     index = comRes!.newOffset
 
@@ -226,16 +222,10 @@ public class MqttDecodeConnAck: NSObject {
                     authenticationData = valRes.resStr
                     index = valRes.newOffset
 
-
                 default:
                     break
                 }
-
-
             }
-
         }
-
     }
-
 }

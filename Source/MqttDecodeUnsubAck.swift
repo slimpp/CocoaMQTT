@@ -8,7 +8,6 @@
 import Foundation
 
 public class MqttDecodeUnsubAck: NSObject {
-
     var totalCount = 0
     var dataIndex = 0
     var propertyLength: Int = 0
@@ -19,21 +18,20 @@ public class MqttDecodeUnsubAck: NSObject {
     public var reasonString: String?
     public var userProperty: [String: String]?
 
-
-    public func decodeUnSubAck(fixedHeader: UInt8, pubAckData: [UInt8]){
+    public func decodeUnSubAck(fixedHeader: UInt8, pubAckData: [UInt8]) {
         totalCount = pubAckData.count
         dataIndex = 0
-        //msgid
-        let msgidResult = integerCompute(data: pubAckData, formatType: formatInt.formatUint16.rawValue, offset: dataIndex)
+        // msgid
+        let msgidResult = integerCompute(data: pubAckData, formatType: FormatInt.formatUint16.rawValue, offset: dataIndex)
         msgid = UInt16(msgidResult!.res)
         dataIndex = msgidResult!.newOffset
 
-        var protocolVersion = "";
+        var protocolVersion = ""
         if let storage = CocoaMQTTStorage() {
             protocolVersion = storage.queryMQTTVersion()
         }
 
-        if (protocolVersion == "5.0"){
+        if protocolVersion == "5.0" {
             // 3.11.2.1 UNSUBACK Properties
             // 3.11.2.1.1 Property Length
             let propertyLengthVariableByteInteger = decodeVariableByteInteger(data: pubAckData, offset: dataIndex)
@@ -49,7 +47,6 @@ public class MqttDecodeUnsubAck: NSObject {
                     break
                 }
 
-
                 switch propertyName.rawValue {
                 // 3.11.2.1.2 Reason String
                 case CocoaMQTTPropertyName.reasonString.rawValue:
@@ -61,8 +58,8 @@ public class MqttDecodeUnsubAck: NSObject {
 
                 // 3.11.2.1.3 User Property
                 case CocoaMQTTPropertyName.userProperty.rawValue:
-                    var key:String?
-                    var value:String?
+                    var key: String?
+                    var value: String?
                     guard let keyRes = unsignedByteToString(data: pubAckData, offset: dataIndex) else {
                         break
                     }
@@ -77,13 +74,11 @@ public class MqttDecodeUnsubAck: NSObject {
 
                     userProperty![key!] = value
 
-
                 default:
                     return
                 }
             }
         }
-
 
         if dataIndex < totalCount {
             while dataIndex < totalCount {
@@ -94,9 +89,5 @@ public class MqttDecodeUnsubAck: NSObject {
                 dataIndex += 1
             }
         }
-
     }
-
 }
-
-

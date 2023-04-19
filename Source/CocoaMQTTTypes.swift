@@ -14,37 +14,35 @@ extension UInt16 {
     private var highByte: UInt8 {
         return UInt8( (self & 0xFF00) >> 8)
     }
-    
+
     /// Least Significant Byte (LSB)
     private var lowByte: UInt8 {
         return UInt8(self & 0x00FF)
     }
-    
+
     var hlBytes: [UInt8] {
         return [highByte, lowByte]
     }
 }
-
 
 extension String {
     /// String with two bytes length
     var bytesWithLength: [UInt8] {
         return UInt16(utf8.count).hlBytes + utf8
     }
-    
+
     var stringUTF8: String {
         let data = self.data(using: .nonLossyASCII)
         return String(data: data!, encoding: .utf8) ?? ""
     }
 }
 
-
 extension Bool {
     /// Bool to bit of UInt8
     var bit: UInt8 {
         return self ? 1 : 0
     }
-    
+
     /// Initial a bool with a bit
     init(bit: UInt8) {
         self = (bit == 0) ? false : true
@@ -58,17 +56,15 @@ extension UInt8 {
     }
 }
 
-
 public enum CocoaMQTTError: Error {
     case invalidURL
     case readTimeout
     case writeTimeout
     @available(OSX 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *)
-    public enum FoundationConnection : Error {
+    public enum FoundationConnection: Error {
         case closed(URLSessionWebSocketTask.CloseCode)
     }
 }
-
 
 extension Array where Element == UInt8 {
     var summary: String {
@@ -84,12 +80,10 @@ extension Array where Element == UInt8 {
     }
 }
 
-
-
 extension Data {
     var uint8: UInt8 {
         var number: UInt8 = 0
-        self.copyBytes(to:&number, count: MemoryLayout<UInt8>.size)
+        self.copyBytes(to: &number, count: MemoryLayout<UInt8>.size)
         return number
     }
 
@@ -105,7 +99,7 @@ extension Data {
 
     var uuid: NSUUID? {
         var bytes = [UInt8](repeating: 0, count: self.count)
-        self.copyBytes(to:&bytes, count: self.count * MemoryLayout<UInt32>.size)
+        self.copyBytes(to: &bytes, count: self.count * MemoryLayout<UInt32>.size)
         return NSUUID(uuidBytes: bytes)
     }
     var stringASCII: String? {
@@ -125,9 +119,7 @@ extension Data {
         let format = options.contains(.upperCase) ? "%02hhX" : "%02hhx"
         return map { String(format: format, $0) }.joined()
     }
-
 }
-
 
 extension Int {
     var data: Data {
@@ -165,5 +157,3 @@ extension UInt32 {
         ]
     }
 }
-
-

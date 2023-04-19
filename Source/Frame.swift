@@ -12,16 +12,16 @@ import Foundation
 @objc public enum CocoaMQTTQoS: UInt8, CustomStringConvertible {
     /// At most once delivery
     case qos0 = 0
-    
+
     /// At least once delivery
     case qos1
-    
+
     /// Exactly once delivery
     case qos2
-    
+
     /// !!! Used SUBACK frame only
     case FAILURE = 0x80
-    
+
     public var description: String {
         switch self {
         case .qos0: return "qos0"
@@ -33,19 +33,18 @@ import Foundation
 }
 
 extension CocoaMQTTQoS: Comparable {
-    
     public static func < (lhs: CocoaMQTTQoS, rhs: CocoaMQTTQoS) -> Bool {
         return lhs.rawValue < rhs.rawValue
     }
-    
+
     public static func <= (lhs: CocoaMQTTQoS, rhs: CocoaMQTTQoS) -> Bool {
         return lhs.rawValue <= rhs.rawValue
     }
-    
+
     public static func > (lhs: CocoaMQTTQoS, rhs: CocoaMQTTQoS) -> Bool {
         return lhs.rawValue > rhs.rawValue
     }
-    
+
     public static func >= (lhs: CocoaMQTTQoS, rhs: CocoaMQTTQoS) -> Bool {
         return lhs.rawValue >= rhs.rawValue
     }
@@ -73,14 +72,11 @@ enum FrameType: UInt8 {
 
 /// The frame can be initialized with a bytes
 protocol InitialWithBytes {
-
     init?(packetFixedHeaderType: UInt8, bytes: [UInt8])
 }
 
-
 /// MQTT Frame protocol
 protocol Frame {
-    
     /// Each MQTT Control Packet contains a fixed header
     /// MQTT 3.1.1
     var packetFixedHeaderType: UInt8 {get set}
@@ -94,7 +90,10 @@ protocol Frame {
     /// MQTT 5.0
     func variableHeader5() -> [UInt8]
 
-    /// MQTT 5.0 The last field in the Variable Header of the CONNECT, CONNACK, PUBLISH, PUBACK, PUBREC, PUBREL, PUBCOMP, SUBSCRIBE, SUBACK, UNSUBSCRIBE, UNSUBACK, DISCONNECT, and AUTH packet is a set of Properties. In the CONNECT packet there is also an optional set of Properties in the Will Properties field with the Payload.
+    /// MQTT 5.0 The last field in the Variable Header of the CONNECT, CONNACK,
+    /// PUBLISH, PUBACK, PUBREC, PUBREL, PUBCOMP, SUBSCRIBE, SUBACK, UNSUBSCRIBE,
+    /// UNSUBACK, DISCONNECT, and AUTH packet is a set of Properties. In the CONNECT
+    /// packet there is also an optional set of Properties in the Will Properties field with the Payload.
     func properties() -> [UInt8]
 
     /// Some MQTT Control Packets contain a payload as the final part of the packet
@@ -109,10 +108,8 @@ protocol Frame {
 }
 
 extension Frame {
-
     /// Pack struct to binary
     func bytes(version: String) -> [UInt8] {
-
         if version == "5.0" {
             let fixedHeader = self.fixedHeader()
             let variableHeader5 = self.variableHeader5()
@@ -130,8 +127,7 @@ extension Frame {
             printDebug("=============================================================")
 
             return [packetFixedHeaderType] + remainingLen(len: len5) + variableHeader5 + properties + payload5
-        }else {
-
+        } else {
             let variableHeader = self.variableHeader()
             let payload = self.payload()
 
@@ -143,34 +139,32 @@ extension Frame {
             printDebug("variableHeader \(variableHeader)")
             printDebug("payload \(payload)")
             printDebug("=============================================================")
-            
+
             return [packetFixedHeaderType] + remainingLen(len: len) + variableHeader + payload
         }
-
     }
-    
+
     private func remainingLen(len: UInt32) -> [UInt8] {
         var bytes: [UInt8] = []
         var digit: UInt8 = 0
-        
+
         var len = len
         repeat {
             digit = UInt8(len % 128)
-            len = len / 128
+            len /= 128
             // if there are more digits to encode, set the top bit of this digit
             if len > 0 {
                 digit = digit | 0x80
             }
             bytes.append(digit)
         } while len > 0
-        
+
         return bytes
     }
 }
 
 /// Fixed Header Attributes
 extension Frame {
-
     /// The Fixed Header consist of the following attritutes
     ///
     /// +---------+----------+-------+--------+
@@ -178,23 +172,22 @@ extension Frame {
     /// +---------+----------+-------+--------+
     /// |  Type   | DUP flag |  QoS  | RETAIN |
     /// +-------------------------------------+
-    
-    
+
     /// The type of the Frame
     var type: FrameType {
         return  FrameType(rawValue: packetFixedHeaderType & 0xF0)!
     }
-    
+
     /// Dup flag
     var dup: Bool {
         get {
             return ((packetFixedHeaderType & 0x08) >> 3) == 0 ? false : true
         }
         set {
-            packetFixedHeaderType = (packetFixedHeaderType & 0xF7) | (newValue.bit  << 3)
+            packetFixedHeaderType = (packetFixedHeaderType & 0xF7) | (newValue.bit << 3)
         }
     }
-    
+
     /// Qos level
     var qos: CocoaMQTTQoS {
         get {
@@ -204,7 +197,7 @@ extension Frame {
             packetFixedHeaderType = (packetFixedHeaderType & 0xF9) | (newValue.rawValue << 1)
         }
     }
-    
+
     /// Retained flag
     var retained: Bool {
         get {
@@ -215,5 +208,3 @@ extension Frame {
         }
     }
 }
-
-

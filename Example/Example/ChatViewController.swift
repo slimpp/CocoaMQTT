@@ -6,9 +6,8 @@
 //  Copyright © 2015年 emqtt.io. All rights reserved.
 //
 
-import UIKit
 import CocoaMQTT
-
+import UIKit
 
 class ChatViewController: UIViewController {
     var animal: String? {
@@ -40,28 +39,26 @@ class ChatViewController: UIViewController {
             scrollToBottom()
         }
     }
-    
-    @IBOutlet weak var tableView: UITableView!
-    @IBOutlet weak var messageTextView: UITextView! {
+
+    @IBOutlet private weak var tableView: UITableView!
+    @IBOutlet private weak var messageTextView: UITextView! {
         didSet {
             messageTextView.layer.cornerRadius = 5
         }
     }
-    @IBOutlet weak var animalAvatarImageView: UIImageView!
-    @IBOutlet weak var sloganLabel: UILabel!
-    
-    @IBOutlet weak var messageTextViewHeightConstraint: NSLayoutConstraint!
-    @IBOutlet weak var inputViewBottomConstraint: NSLayoutConstraint!
-    
-    @IBOutlet weak var sendMessageButton: UIButton! {
+    @IBOutlet private weak var animalAvatarImageView: UIImageView!
+    @IBOutlet private weak var sloganLabel: UILabel!
+
+    @IBOutlet private weak var messageTextViewHeightConstraint: NSLayoutConstraint!
+    @IBOutlet private weak var inputViewBottomConstraint: NSLayoutConstraint!
+
+    @IBOutlet private weak var sendMessageButton: UIButton! {
         didSet {
             sendMessageButton.isEnabled = false
         }
     }
-    
-    @IBAction func sendMessage() {
 
-        
+    @IBAction private func sendMessage() {
         let message = messageTextView.text
 
         let publishProperties = MqttPublishProperties()
@@ -69,10 +66,10 @@ class ChatViewController: UIViewController {
 
         if mqttVersion == "3.1.1" {
             mqtt!.publish("chat/room/animals/client/" + animal!, withString: message!, qos: .qos1)
-        }else if mqttVersion == "5.0" {
+        } else if mqttVersion == "5.0" {
             mqtt5!.publish("chat/room/animals/client/" + animal!, withString: message!, qos: .qos1, DUP: true, retained: false, properties: publishProperties)
         }
-        
+
         messageTextView.text = ""
         sendMessageButton.isEnabled = false
         messageTextViewHeightConstraint.constant = messageTextView.contentSize.height
@@ -80,19 +77,18 @@ class ChatViewController: UIViewController {
         view.endEditing(true)
     }
 
-    @IBAction func disconnect() {
-
+    @IBAction private func disconnect() {
         if mqttVersion == "3.1.1" {
             mqtt!.disconnect()
-        }else if mqttVersion == "5.0" {
+        } else if mqttVersion == "5.0" {
             mqtt5!.disconnect()
-            //or
-            //mqtt5!.disconnect(reasonCode: CocoaMQTTDISCONNECTReasonCode.disconnectWithWillMessage, userProperties: ["userone":"hi"])
+            // or
+            // mqtt5!.disconnect(reasonCode: CocoaMQTTDISCONNECTReasonCode.disconnectWithWillMessage, userProperties: ["userone":"hi"])
         }
 
         _ = navigationController?.popViewController(animated: true)
     }
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationController?.navigationBar.isHidden = true
@@ -110,29 +106,38 @@ class ChatViewController: UIViewController {
         tableView.dataSource = self
         tableView.rowHeight = UITableView.automaticDimension
         tableView.estimatedRowHeight = 50
-        
+
         let name = NSNotification.Name(rawValue: "MQTTMessageNotification" + animal!)
 
         if mqttVersion == "3.1.1" {
             NotificationCenter.default.addObserver(self, selector: #selector(ChatViewController.receivedMessage(notification:)), name: name, object: nil)
-        }else if mqttVersion == "5.0" {
+        } else if mqttVersion == "5.0" {
             NotificationCenter.default.addObserver(self, selector: #selector(ChatViewController.receivedMqtt5Message(notification:)), name: name, object: nil)
         }
 
         let disconnectNotification = NSNotification.Name(rawValue: "MQTTMessageNotificationDisconnect")
-        NotificationCenter.default.addObserver(self, selector: #selector(ChatViewController.disconnectMessage(notification:)), name: disconnectNotification, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(ChatViewController.keyboardChanged(notification:)), name: UIResponder.keyboardWillChangeFrameNotification, object: nil)
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(ChatViewController.disconnectMessage(notification:)),
+            name: disconnectNotification, object: nil
+        )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(ChatViewController.keyboardChanged(notification:)),
+            name: UIResponder.keyboardWillChangeFrameNotification, object: nil
+        )
     }
-    
+
     deinit {
         NotificationCenter.default.removeObserver(self)
     }
-    
+
     @objc func keyboardChanged(notification: NSNotification) {
         let userInfo = notification.userInfo as! [String: AnyObject]
         let keyboardValue = userInfo["UIKeyboardFrameEndUserInfoKey"]
-        let bottomDistance = UIScreen.main.bounds.size.height - (navigationController?.navigationBar.frame.height)! - keyboardValue!.cgRectValue.origin.y
-        
+        let bottomDistance = UIScreen.main.bounds.size.height -
+            (navigationController?.navigationBar.frame.height)! - keyboardValue!.cgRectValue.origin.y
+
         if bottomDistance > 0 {
             inputViewBottomConstraint.constant = bottomDistance
         } else {
@@ -141,11 +146,9 @@ class ChatViewController: UIViewController {
         view.layoutIfNeeded()
     }
 
-
     @objc func disconnectMessage(notification: NSNotification) {
         disconnect()
     }
-
 
     @objc func receivedMessage(notification: NSNotification) {
         let userInfo = notification.userInfo as! [String: AnyObject]
@@ -162,14 +165,13 @@ class ChatViewController: UIViewController {
         let message = userInfo["message"] as! String
         let topic = userInfo["topic"] as! String
         let id = UInt16(userInfo["id"] as! UInt16)
-        //let sender = userInfo["animal"] as! String
+        // let sender = userInfo["animal"] as! String
         let sender = topic.replacingOccurrences(of: "chat/room/animals/client/", with: "")
         let content = String(message.filter { !"\0".contains($0) })
         let chatMessage = ChatMessage(sender: sender, content: content, id: id)
         print("sendersendersender =  \(sender)")
         messages.append(chatMessage)
     }
-
 
     func scrollToBottom() {
         let count = messages.count
@@ -180,7 +182,6 @@ class ChatViewController: UIViewController {
     }
 }
 
-
 extension ChatViewController: UITextViewDelegate {
     func textViewDidChange(_ textView: UITextView) {
         if textView.contentSize.height != textView.frame.size.height {
@@ -190,8 +191,8 @@ extension ChatViewController: UITextViewDelegate {
                 textView.layoutIfNeeded()
             }
         }
-        
-        if textView.text == "" {
+
+        if textView.text.isEmpty {
             sendMessageButton.isEnabled = false
         } else {
             sendMessageButton.isEnabled = true
@@ -203,10 +204,11 @@ extension ChatViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return messages.count
     }
-    
+
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let message = messages[indexPath.row]
-        print("message.sender: \(message.sender)    animal:\(String(describing: tabBarController?.selectedViewController?.tabBarItem.title!))   message.content:\( message.content)"   )
+        let animal = String(describing: tabBarController?.selectedViewController?.tabBarItem.title!)
+        print("message.sender: \(message.sender)    animal:\(animal)   message.content:\( message.content)"   )
 
         if message.sender == animal {
             let cell = tableView.dequeueReusableCell(withIdentifier: "rightMessageCell", for: indexPath) as! ChatRightMessageCell
@@ -220,7 +222,7 @@ extension ChatViewController: UITableViewDataSource, UITableViewDelegate {
             return cell
         }
     }
-    
+
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         view.endEditing(true)
     }

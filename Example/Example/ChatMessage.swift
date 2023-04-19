@@ -9,7 +9,6 @@
 import Foundation
 
 class ChatMessage {
-
     let id: UInt16
     let sender: String
     let content: String

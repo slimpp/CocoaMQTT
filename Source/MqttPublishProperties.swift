@@ -8,26 +8,24 @@
 import Foundation
 
 public class MqttPublishProperties: NSObject {
-
-
-    //3.3.2.3 PUBLISH Properties
-    //3.3.2.3.1 Property Length
+    // 3.3.2.3 PUBLISH Properties
+    // 3.3.2.3.1 Property Length
     public var propertyLength: Int?
-    //3.3.2.3.2 Payload Format Indicator
+    // 3.3.2.3.2 Payload Format Indicator
     public var payloadFormatIndicator: PayloadFormatIndicator?
-    //3.3.2.3.3 Message Expiry Interval
+    // 3.3.2.3.3 Message Expiry Interval
     public var messageExpiryInterval: UInt32?
-    //3.3.2.3.4 Topic Alias
+    // 3.3.2.3.4 Topic Alias
     public var topicAlias: UInt16?
-    //3.3.2.3.5 Response Topic
+    // 3.3.2.3.5 Response Topic
     public var responseTopic: String?
-    //3.3.2.3.6 Correlation Data
+    // 3.3.2.3.6 Correlation Data
     public var correlationData: [UInt8]?
-    //3.3.2.3.7 Property
+    // 3.3.2.3.7 Property
     public var userProperty: [String: String]?
-    //3.3.2.3.8 Subscription Identifier
+    // 3.3.2.3.8 Subscription Identifier
     public var subscriptionIdentifier: UInt32?
-    //3.3.2.3.9 Content Type
+    // 3.3.2.3.9 Content Type
     public var contentType: String?
 
     public init(
@@ -55,44 +53,41 @@ public class MqttPublishProperties: NSObject {
     public var properties: [UInt8] {
         var properties = [UInt8]()
 
-        //3.3.2.3.2  Payload Format Indicator
+        // 3.3.2.3.2  Payload Format Indicator
         if let payloadFormatIndicator = self.payloadFormatIndicator {
             properties += getMQTTPropertyData(type: CocoaMQTTPropertyName.payloadFormatIndicator.rawValue, value: [payloadFormatIndicator.rawValue])
         }
-        //3.3.2.3.3  Message Expiry Interval
+        // 3.3.2.3.3  Message Expiry Interval
         if let messageExpiryInterval = self.messageExpiryInterval {
             properties += getMQTTPropertyData(type: CocoaMQTTPropertyName.willExpiryInterval.rawValue, value: messageExpiryInterval.byteArrayLittleEndian)
         }
-        //3.3.2.3.4 Topic Alias
+        // 3.3.2.3.4 Topic Alias
         if let topicAlias = self.topicAlias {
             properties += getMQTTPropertyData(type: CocoaMQTTPropertyName.topicAlias.rawValue, value: topicAlias.hlBytes)
         }
-        //3.3.2.3.5 Response Topic
+        // 3.3.2.3.5 Response Topic
         if let responseTopic = self.responseTopic {
             properties += getMQTTPropertyData(type: CocoaMQTTPropertyName.responseTopic.rawValue, value: responseTopic.bytesWithLength)
         }
-        //3.3.2.3.6 Correlation Data
+        // 3.3.2.3.6 Correlation Data
         if let correlationData = self.correlationData {
             properties += getMQTTPropertyData(type: CocoaMQTTPropertyName.correlationData.rawValue, value: correlationData)
         }
-        //3.3.2.3.7 Property Length User Property
+        // 3.3.2.3.7 Property Length User Property
         if let userProperty = self.userProperty {
             let dictValues = [String](userProperty.values)
             for (value) in dictValues {
                 properties += getMQTTPropertyData(type: CocoaMQTTPropertyName.userProperty.rawValue, value: value.bytesWithLength)
             }
         }
-        //3.3.2.3.8 Subscription Identifier
+        // 3.3.2.3.8 Subscription Identifier
         if let subscriptionIdentifier = self.subscriptionIdentifier {
             properties += getMQTTPropertyData(type: CocoaMQTTPropertyName.subscriptionIdentifier.rawValue, value: subscriptionIdentifier.byteArrayLittleEndian)
         }
-        //3.3.2.3.9 Content Type
+        // 3.3.2.3.9 Content Type
         if let contentType = self.contentType {
             properties += getMQTTPropertyData(type: CocoaMQTTPropertyName.contentType.rawValue, value: contentType.bytesWithLength)
         }
-
-
-        
 
         return properties
     }

@@ -9,7 +9,6 @@
 import Foundation
 
 protocol CocoaMQTTStorageProtocol {
-
     var clientId: String { get set }
 
     init?(by clientId: String)
@@ -29,14 +28,13 @@ protocol CocoaMQTTStorageProtocol {
 }
 
 final class CocoaMQTTStorage: CocoaMQTTStorageProtocol {
-
     var clientId: String = ""
 
-    var userDefault: UserDefaults = UserDefaults()
+    var userDefault = UserDefaults()
 
-    var versionDefault: UserDefaults = UserDefaults()
+    var versionDefault = UserDefaults()
 
-    init?(){
+    init?() {
         versionDefault = UserDefaults()
     }
 
@@ -54,14 +52,13 @@ final class CocoaMQTTStorage: CocoaMQTTStorageProtocol {
         versionDefault.synchronize()
     }
 
-    func setMQTTVersion(_ version : String) {
+    func setMQTTVersion(_ version: String) {
         versionDefault.set(version, forKey: "cocoamqtt.emqx.version")
     }
 
     func queryMQTTVersion() -> String {
         return versionDefault.string(forKey: "cocoamqtt.emqx.version") ?? "3.1.1"
     }
-
 
     func write(_ frame: FramePublish) -> Bool {
         guard frame.qos > .qos0 else {
@@ -97,11 +94,11 @@ final class CocoaMQTTStorage: CocoaMQTTStorageProtocol {
     }
 
     func readAll() -> [Frame] {
-        return __read(needDelete: false)
+        return read(needDelete: false)
     }
 
     func takeAll() -> [Frame] {
-        return __read(needDelete: true)
+        return read(needDelete: true)
     }
 
     private func key(_ msgid: UInt16) -> String {
@@ -118,18 +115,16 @@ final class CocoaMQTTStorage: CocoaMQTTStorageProtocol {
             return nil
         }
         /// bytes 1..<5 may be 'Remaining Length'
-        for i in 1 ..< min(5, bytes.count){
-            if (bytes[i] & 0x80) == 0 {
-                return (bytes[0], Array(bytes.suffix(from: i+1)))
-            }
+        for i in 1 ..< min(5, bytes.count) where (bytes[i] & 0x80) == 0 {
+            return (bytes[0], Array(bytes.suffix(from: i + 1)))
         }
 
         return nil
     }
 
-    private func __read(needDelete: Bool)  -> [Frame] {
+    private func read(needDelete: Bool) -> [Frame] {
         var frames = [Frame]()
-        let allObjs = userDefault.dictionaryRepresentation().sorted { (k1, k2) in
+        let allObjs = userDefault.dictionaryRepresentation().sorted { k1, k2 in
             return k1.key < k2.key
         }
         for (k, v) in allObjs {
@@ -148,6 +143,4 @@ final class CocoaMQTTStorage: CocoaMQTTStorageProtocol {
         }
         return frames
     }
-
 }
-

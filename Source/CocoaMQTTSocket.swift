@@ -13,16 +13,16 @@ import MqttCocoaAsyncSocket
 public protocol CocoaMQTTSocketDelegate: AnyObject {
     func socketConnected(_ socket: CocoaMQTTSocketProtocol)
     func socket(_ socket: CocoaMQTTSocketProtocol, didReceive trust: SecTrust, completionHandler: @escaping (Bool) -> Swift.Void)
-    func socketUrlSession(_ socket: CocoaMQTTSocketProtocol, didReceiveTrust trust: SecTrust, didReceiveChallenge challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void)
+    func socketUrlSession(_ socket: CocoaMQTTSocketProtocol, didReceiveTrust trust: SecTrust, didReceiveChallenge challenge: URLAuthenticationChallenge,
+                          completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void)
     func socket(_ socket: CocoaMQTTSocketProtocol, didWriteDataWithTag tag: Int)
     func socket(_ socket: CocoaMQTTSocketProtocol, didRead data: Data, withTag tag: Int)
     func socketDidDisconnect(_ socket: CocoaMQTTSocketProtocol, withError err: Error?)
 }
 
 public protocol CocoaMQTTSocketProtocol {
-    
     var enableSSL: Bool { get set }
-    
+
     func setDelegate(_ theDelegate: CocoaMQTTSocketDelegate?, delegateQueue: DispatchQueue?)
     func connect(toHost host: String, onPort port: UInt16) throws
     func connect(toHost host: String, onPort port: UInt16, withTimeout timeout: TimeInterval) throws
@@ -34,22 +34,21 @@ public protocol CocoaMQTTSocketProtocol {
 // MARK: - CocoaMQTTSocket
 
 public class CocoaMQTTSocket: NSObject {
-    
     public var backgroundOnSocket = true
 
     public var enableSSL = false
-    
+
     ///
     public var sslSettings: [String: NSObject]?
-    
+
     /// Allow self-signed ca certificate.
     ///
     /// Default is false
     public var allowUntrustCACertificate = false
-    
+
     fileprivate let reference = MGCDAsyncSocket()
     fileprivate weak var delegate: CocoaMQTTSocketDelegate?
-    
+
     public override init() { super.init() }
 }
 
@@ -58,23 +57,23 @@ extension CocoaMQTTSocket: CocoaMQTTSocketProtocol {
         delegate = theDelegate
         reference.setDelegate((delegate != nil ? self : nil), delegateQueue: delegateQueue)
     }
-    
+
     public func connect(toHost host: String, onPort port: UInt16) throws {
         try connect(toHost: host, onPort: port, withTimeout: -1)
     }
-    
+
     public func connect(toHost host: String, onPort port: UInt16, withTimeout timeout: TimeInterval) throws {
         try reference.connect(toHost: host, onPort: port, withTimeout: timeout)
     }
-    
+
     public func disconnect() {
         reference.disconnect()
     }
-    
+
     public func readData(toLength length: UInt, withTimeout timeout: TimeInterval, tag: Int) {
         reference.readData(toLength: length, withTimeout: timeout, tag: tag)
     }
-    
+
     public func write(_ data: Data, withTimeout timeout: TimeInterval, tag: Int) {
         reference.write(data, withTimeout: timeout, tag: tag)
     }
@@ -83,7 +82,7 @@ extension CocoaMQTTSocket: CocoaMQTTSocketProtocol {
 extension CocoaMQTTSocket: MGCDAsyncSocketDelegate {
     public func socket(_ sock: MGCDAsyncSocket, didConnectToHost host: String, port: UInt16) {
         printInfo("Connected to \(host) : \(port)")
-        
+
          #if os(iOS)
              if backgroundOnSocket {
                  sock.perform {
@@ -95,7 +94,7 @@ extension CocoaMQTTSocket: MGCDAsyncSocketDelegate {
                  }
              }
          #endif
-        
+
          if enableSSL {
              var setting = sslSettings ?? [:]
              if allowUntrustCACertificate {

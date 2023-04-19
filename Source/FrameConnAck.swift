@@ -9,53 +9,50 @@
 import Foundation
 
 struct FrameConnAck: Frame {
-
     var packetFixedHeaderType: UInt8 = FrameType.connack.rawValue
-    
+
     // --- Attributes
 
-    ///MQTT 3.1.1
+    /// MQTT 3.1.1
     var returnCode: CocoaMQTTConnAck?
 
-    ///MQTT 5.0
+    /// MQTT 5.0
     var reasonCode: CocoaMQTTCONNACKReasonCode?
 
-    //3.2.2.1.1 Session Present
-    var sessPresent: Bool = false
-    
+    // 3.2.2.1.1 Session Present
+    var sessPresent = false
+
     // --- Attributes End
 
-    //3.2.2.3 CONNACK Properties
+    // 3.2.2.3 CONNACK Properties
     var connackProperties: MqttDecodeConnAck?
     var propertiesBytes: [UInt8]?
-    //3.2.3 CONNACK Payload
-    //The CONNACK packet has no Payload.
+    // 3.2.3 CONNACK Payload
+    // The CONNACK packet has no Payload.
 
-    ///MQTT 3.1.1
+    /// MQTT 3.1.1
     init(returnCode: CocoaMQTTConnAck) {
         self.returnCode = returnCode
     }
 
-    ///MQTT 5.0
+    /// MQTT 5.0
     init(code: CocoaMQTTCONNACKReasonCode) {
         reasonCode = code
     }
-
 }
 
 extension FrameConnAck {
-    
     func fixedHeader() -> [UInt8] {
         var header = [UInt8]()
         header += [FrameType.connack.rawValue]
-        
+
         return header
     }
 
     func variableHeader5() -> [UInt8] {
         return [sessPresent.bit, reasonCode!.rawValue]
     }
-    
+
     func payload5() -> [UInt8] { return [] }
 
     func properties() -> [UInt8] { return propertiesBytes ?? [] }
@@ -79,22 +76,21 @@ extension FrameConnAck {
 }
 
 extension FrameConnAck: InitialWithBytes {
-    
     init?(packetFixedHeaderType: UInt8, bytes: [UInt8]) {
         guard packetFixedHeaderType == FrameType.connack.rawValue else {
             return nil
         }
-        
+
         guard bytes.count >= 2 else {
             return nil
         }
 
         sessPresent = Bool(bit: bytes[0] & 0x01)
-        
+
         let mqtt5ack = CocoaMQTTCONNACKReasonCode(rawValue: bytes[1])
         reasonCode = mqtt5ack
 
-        let ack = CocoaMQTTConnAck(byte: bytes[1]) 
+        let ack = CocoaMQTTConnAck(byte: bytes[1])
         returnCode = ack
 
         propertiesBytes = bytes

@@ -8,7 +8,6 @@
 import Foundation
 
 public class MqttDecodePubAck: NSObject {
-
     var totalCount = 0
     var dataIndex = 0
     var propertyLength: Int = 0
@@ -18,21 +17,18 @@ public class MqttDecodePubAck: NSObject {
     public var reasonString: String?
     public var userProperty: [String: String]?
 
-
-
-
-    
-    public func decodePubAck(fixedHeader: UInt8, pubAckData: [UInt8]){
+    public func decodePubAck(fixedHeader: UInt8, pubAckData: [UInt8]) {
         totalCount = pubAckData.count
         dataIndex = 0
-        //msgid
-        let msgidResult = integerCompute(data: pubAckData, formatType: formatInt.formatUint16.rawValue, offset: dataIndex)
+        // msgid
+        let msgidResult = integerCompute(data: pubAckData, formatType: FormatInt.formatUint16.rawValue, offset: dataIndex)
         msgid = UInt16(msgidResult!.res)
         dataIndex = msgidResult!.newOffset
 
         // 3.4.2.1 PUBACK Reason Code
 
-        // The Reason Code and Property Length can be omitted if the Reason Code is 0x00 (Success) and there are no Properties. In this case the PUBACK has a Remaining Length of 2.
+        // The Reason Code and Property Length can be omitted if the Reason Code is 0x00 (Success)
+        // and there are no Properties. In this case the PUBACK has a Remaining Length of 2.
         if dataIndex + 1 > pubAckData.count {
             return
         }
@@ -43,12 +39,12 @@ public class MqttDecodePubAck: NSObject {
         reasonCode = ack
         dataIndex += 1
 
-        var protocolVersion = "";
+        var protocolVersion = ""
         if let storage = CocoaMQTTStorage() {
             protocolVersion = storage.queryMQTTVersion()
         }
 
-        if (protocolVersion == "5.0"){
+        if protocolVersion == "5.0" {
             // 3.4.2.2 PUBACK Properties
             // 3.4.2.2.1 Property Length
             let propertyLengthVariableByteInteger = decodeVariableByteInteger(data: pubAckData, offset: dataIndex)
@@ -58,7 +54,6 @@ public class MqttDecodePubAck: NSObject {
             let occupyIndex = dataIndex
 
             while dataIndex < occupyIndex + propertyLength {
-
                 let resVariableByteInteger = decodeVariableByteInteger(data: pubAckData, offset: dataIndex)
                 dataIndex = resVariableByteInteger.newOffset
                 let propertyNameByte = resVariableByteInteger.res
@@ -77,8 +72,8 @@ public class MqttDecodePubAck: NSObject {
 
                 // 3.4.2.2.3 User Property
                 case CocoaMQTTPropertyName.userProperty.rawValue:
-                    var key:String?
-                    var value:String?
+                    var key: String?
+                    var value: String?
                     guard let keyRes = unsignedByteToString(data: pubAckData, offset: dataIndex) else {
                         break
                     }
@@ -93,14 +88,10 @@ public class MqttDecodePubAck: NSObject {
 
                     userProperty![key!] = value
 
-
                 default:
                     return
                 }
-
             }
-
         }
-
     }
 }

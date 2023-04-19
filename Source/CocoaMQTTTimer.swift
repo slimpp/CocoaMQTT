@@ -14,12 +14,11 @@ import Foundation
 /// crashes that occur from calling resume multiple times on a timer that is
 /// already resumed (noted by https://github.com/SiftScience/sift-ios/issues/52)
 class CocoaMQTTTimer {
-    
     let timeInterval: TimeInterval
     let startDelay: TimeInterval
     let name: String
-    
-    init(delay:TimeInterval?=nil, name: String, timeInterval: TimeInterval) {
+
+    init(delay: TimeInterval? = nil, name: String, timeInterval: TimeInterval) {
         self.name = name
         self.timeInterval = timeInterval
         if let delay = delay {
@@ -28,14 +27,14 @@ class CocoaMQTTTimer {
             self.startDelay = timeInterval
         }
     }
-    
+
     class func every(_ interval: TimeInterval, name: String, _ block: @escaping () -> Void) -> CocoaMQTTTimer {
         let timer = CocoaMQTTTimer(name: name, timeInterval: interval)
         timer.eventHandler = block
         timer.resume()
         return timer
     }
-    
+
     @discardableResult
     class func after(_ interval: TimeInterval, name: String, _ block: @escaping () -> Void) -> CocoaMQTTTimer {
         let timer: CocoaMQTTTimer? = CocoaMQTTTimer(delay: interval, name: name, timeInterval: 0)
@@ -47,13 +46,13 @@ class CocoaMQTTTimer {
         timer?.resume()
         return timer!
     }
-    
-    /// Execute the tasks concurrently on the target_queue with default QOS
-    private static let target_queue = DispatchQueue(label: "io.emqx.CocoaMQTT.TimerQueue", qos: .default, attributes: .concurrent)
-    
+
+    /// Execute the tasks concurrently on the targetQueue with default QOS
+    private static let targetQueue = DispatchQueue(label: "io.emqx.CocoaMQTT.TimerQueue", qos: .default, attributes: .concurrent)
+
     /// Execute each timer tasks serially and use the target queue for concurrency among timers
     private lazy var timer: DispatchSourceTimer = {
-        let queue = DispatchQueue(label: "io.emqx.CocoaMQTT." + name, target: CocoaMQTTTimer.target_queue)
+        let queue = DispatchQueue(label: "io.emqx.CocoaMQTT." + name, target: CocoaMQTTTimer.targetQueue)
         let t = DispatchSource.makeTimerSource(flags: .strict, queue: queue)
         t.schedule(deadline: .now() + self.startDelay, repeating: self.timeInterval > 0 ? Double(self.timeInterval) : Double.infinity)
         t.setEventHandler(handler: { [weak self] in
@@ -61,17 +60,17 @@ class CocoaMQTTTimer {
         })
         return t
     }()
-    
+
     var eventHandler: (() -> Void)?
-    
+
     private enum State {
         case suspended
         case resumed
         case canceled
     }
-    
+
     private var state: State = .suspended
-    
+
     deinit {
         timer.setEventHandler {}
         timer.cancel()
@@ -82,7 +81,7 @@ class CocoaMQTTTimer {
         resume()
         eventHandler = nil
     }
-    
+
     func resume() {
         if state == .resumed {
             return
@@ -90,7 +89,7 @@ class CocoaMQTTTimer {
         state = .resumed
         timer.resume()
     }
-    
+
     func suspend() {
         if state == .suspended {
             return
@@ -98,7 +97,7 @@ class CocoaMQTTTimer {
         state = .suspended
         timer.suspend()
     }
-    
+
     /// Manually cancel timer
     func cancel() {
         if state == .canceled {

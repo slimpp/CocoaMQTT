@@ -7,15 +7,14 @@
 
 import Foundation
 
-///3.8.3.1 Subscription Options
+/// 3.8.3.1 Subscription Options
 public class MqttSubscription {
- 
     public var topic: String
     public var qos = CocoaMQTTQoS.qos1
-    public var noLocal: Bool = false
-    public var retainAsPublished: Bool = false
+    public var noLocal = false
+    public var retainAsPublished = false
     public var retainHandling: CocoaRetainHandlingOption
-    public var subscriptionOptions: Bool = false
+    public var subscriptionOptions = false
 
     public init(topic: String) {
         self.topic = topic
@@ -33,12 +32,12 @@ public class MqttSubscription {
         self.retainHandling = CocoaRetainHandlingOption.none
     }
 
-    var subscriptionData:[UInt8]{
+    var subscriptionData: [UInt8] {
         var data = [UInt8]()
 
         data += topic.bytesWithLength
 
-        var options:Int = 0;
+        var options: Int = 0
         switch self.qos {
         case .qos0:
             options = options | 0b0000_0000
@@ -73,13 +72,10 @@ public class MqttSubscription {
             options = options | 0b0000_0000
         }
 
-
         if subscriptionOptions {
             data += [UInt8(options)]
         }
 
-
         return data
     }
-
 }
