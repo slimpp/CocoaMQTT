@@ -23,13 +23,16 @@ private struct InflightFrame {
     
     var timestamp: TimeInterval
     
+    var retryCount: Int
+
     init(frame: Frame) {
-        self.init(frame: frame, timestamp: Date.init(timeIntervalSinceNow: 0).timeIntervalSince1970)
+        self.init(frame: frame, timestamp: Date.init(timeIntervalSinceNow: 0).timeIntervalSince1970, retryCount: 0)
     }
     
-    init(frame: Frame, timestamp: TimeInterval) {
+    init(frame: Frame, timestamp: TimeInterval, retryCount: Int) {
         self.frame = frame
         self.timestamp = timestamp
+        self.retryCount = retryCount
     }
 }
 
@@ -210,11 +213,11 @@ extension CocoaMQTTDeliver {
         
         let nowTimestamp = Date(timeIntervalSinceNow: 0).timeIntervalSince1970
         for (idx, frame) in inflight.enumerated() {
-            if (nowTimestamp - frame.timestamp) >= (retryTimeInterval/1000.0) {
+            if (nowTimestamp - frame.timestamp) >= (retryTimeInterval/1000.0) * Double(frame.retryCount) {
                 
                 var duplicatedFrame = frame
                 duplicatedFrame.frame.dup = true
-                duplicatedFrame.timestamp = nowTimestamp
+                duplicatedFrame.retryCount += 1
                 
                 inflight[idx] = duplicatedFrame
                 
