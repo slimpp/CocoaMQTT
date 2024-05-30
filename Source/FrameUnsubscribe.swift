@@ -86,10 +86,7 @@ extension FrameUnsubscribe {
 
         // 3.10.2.1.2 User Property
         if let userProperty = self.userProperty {
-            let dictValues = [String](userProperty.values)
-            for (value) in dictValues {
-                properties += getMQTTPropertyData(type: CocoaMQTTPropertyName.userProperty.rawValue, value: value.bytesWithLength)
-            }
+            properties += userProperty.userPropertyBytes
         }
 
         return properties
