@@ -39,7 +39,7 @@ open class CocoaMQTTLogger: NSObject {
     public override init() { super.init() }
 
     // min level
-    var minLevel: CocoaMQTTLoggerLevel = .warning
+    public var minLevel: CocoaMQTTLoggerLevel = .warning
     
     // logs
     open func log(level: CocoaMQTTLoggerLevel, message: String) {
